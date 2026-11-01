@@ -4,6 +4,10 @@
 float **im2col(float ***image, int numChannels, int imageSize, int kernelSize, int stride, int *outputSize)
 {
     // TODO: Implement the im2col algorithm
+    int outputSize = (imageSize - kernelSize)/stride + 1;
+
+    
+
 }
 
 // Im2col algorithm's inverse
@@ -38,6 +42,34 @@ float **kernel_flatten(float ****kernel, int num_kernels, int kernel_size)
 float ***convolution(float ***image, int numChannels, float ****kernel, float *biasData, int numFilters, int inputSize, int kernelSize)
 {
     // TODO: Implement the basic convolution operation
+    // outputSize = (inputSize - kernelSize)/stride + 1
+    int outputSize = inputSize - kernelSize + 1;
+
+    float ***output = malloc(sizeof(float **) * numFilters);
+
+    for (int f = 0; f < numFilters; f++){
+        output[f] = malloc(sizeof(float *) * outputSize);
+
+        for (int i = 0; i < outputSize; i++){
+            output[f][i] = malloc(sizeof(float) * outputSize);
+
+            for (int j = 0; j < outputSize; j++){
+                output[f][i][j] = 0.00f;
+
+                for (int c = 0; c < numChannels; c++) {
+                    for (int m = 0; m < kernelSize; m++) {
+                        for (int n = 0; n < kernelSize; n++){
+                            output[f][i][j] += image[c][i+m][j+n] * kernel[f][c][m][n];
+                        }
+                    }
+                }
+                output[f][i][j] += biasData[f];
+                output[f][i][j] = relu(output[f][i][j]);
+            }
+        }
+    }
+
+    return output;
 }
 
 // Convolution with im2col algorithm
