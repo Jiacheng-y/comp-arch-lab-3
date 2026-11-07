@@ -3,6 +3,22 @@
 float *flatten(float ***input, int inputSize, int depth)
 {
   // TODO: Implement the flatten function
+  if (input == NULL || inputSize <= 0 || depth <= 0) {
+      return NULL;
+  }
+    
+  float *output = malloc(sizeof(float) * inputSize * inputSize * depth);
+
+  int flatten_idx = 0;
+  for (int d = 0; d < depth; d++) {
+    for (int i = 0; i < inputSize; i++) {
+        for (int j = 0; j < inputSize; j++) {
+            output[flatten_idx] = input[d][i][j];
+            flatten_idx++; 
+        }
+    }
+  }
+  return output;
 }
 
 void destroyConvOutput(float ***convOutput, int convOutputSize)
@@ -36,4 +52,11 @@ int forwardPass(float ***image, int numChannels, float ****conv1WeightsData, flo
 int predict(float *probabilityVector, int numClasses)
 {
     // TODO: Implement the prediction function
+    int predicted = 0;
+    for (int c = 1; c < numClasses; c++) {
+        if (probabilityVector[c] > probabilityVector[predicted]) {
+            predicted = c;
+        }
+    }
+    return predicted;
 }
