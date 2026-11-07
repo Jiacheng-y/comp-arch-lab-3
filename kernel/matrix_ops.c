@@ -1,13 +1,7 @@
 #include "matrix_ops.h"
 
-
-float **matmul(float **A, float **B, int A_rows, int A_cols, int B_rows, int B_cols)
-{
-    // TODO: Implement matrix multiplication
-    if (A_cols != B_rows) {
-        return NULL;
-    }
-    float **output = malloc(A_rows * sizeof(float *));
+/* matmul operations without matrix creation */
+void matmul_inner(float **output, float **A, float **B, int A_rows, int A_cols, int B_rows, int B_cols) {
     for (int i = 0; i < A_rows; i++){
         output[i] = malloc(B_cols * sizeof(float)); 
         for (int j = 0; j < B_cols; j++){
@@ -17,6 +11,15 @@ float **matmul(float **A, float **B, int A_rows, int A_cols, int B_rows, int B_c
             }
         }
     }
+}
+
+float **matmul(float **A, float **B, int A_rows, int A_cols, int B_rows, int B_cols)
+{
+    if (A_cols != B_rows) {
+        return NULL;
+    }
+    float **output = malloc(A_rows * sizeof(float *));
+    matmul_inner(output, A, B, A_rows, A_cols, B_rows, B_cols); 
 
     return output;
 }
