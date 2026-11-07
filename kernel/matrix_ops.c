@@ -1,51 +1,6 @@
 #include "matrix_ops.h"
 
 
-float **matrix_new(int rows, int cols)
-{
-    if (rows <= 0 || cols <= 0) {
-        return NULL;
-    }
-
-    /*
-     * Allocate the array of row pointers.
-     * calloc initializes every pointer to NULL.
-     */
-    float **matrix = calloc((size_t)rows, sizeof *matrix);
-
-    if (matrix == NULL) {
-        return NULL;
-    }
-
-    /*
-     * Allocate each row.
-     * calloc initializes every matrix element to zero.
-     */
-    for (int i = 0; i < rows; i++) {
-        matrix[i] = calloc((size_t)cols, sizeof **matrix);
-
-        if (matrix[i] == NULL) {
-            matrix_free(matrix, rows);
-            return NULL;
-        }
-    }
-
-    return matrix;
-}
-
-void matrix_free(float **matrix, int rows)
-{
-    if (matrix == NULL) {
-        return;
-    }
-
-    for (int i = 0; i < rows; i++) {
-        free(matrix[i]);
-    }
-
-    free(matrix);
-}
-
 float **matmul(float **A, float **B, int A_rows, int A_cols, int B_rows, int B_cols)
 {
     // TODO: Implement matrix multiplication
@@ -172,7 +127,7 @@ float **matmul_sparse(float **A, float **B, int A_rows, int A_cols, int B_rows, 
      *
      * The output remains a normal float ** matrix.
      */
-    result = calloc((size_t)A_rows, sizeof(float *));
+    result = calloc((size_t)A_rows, sizeof(float *));    
 
     if (result == NULL) {
         goto allocation_failed;
@@ -186,29 +141,7 @@ float **matmul_sparse(float **A, float **B, int A_rows, int A_cols, int B_rows, 
         }
     }
 
-    /*
-     * For each nonzero A[i][k], visit the nonzeros in row k of B.
-     */
-    for (int i = 0; i < A_rows; i++) {
-
-        for (int p = A_row_ptr[i];
-             p < A_row_ptr[i + 1];
-             p++) {
-
-            int k = A_col_idx[p];
-            float A_ik = A_values[p];
-
-            for (int q = B_row_ptr[k];
-                 q < B_row_ptr[k + 1];
-                 q++) {
-
-                int j = B_col_idx[q];
-                float B_kj = B_values[q];
-
-                result[i][j] += A_ik * B_kj;
-            }
-        }
-    }
+    matmul_sparse_inner(result, A_rows, A_row_ptr, A_col_idx, A_values, B_row_ptr, B_col_idx, B_values);
 
     /*
      * The CSR arrays are temporary.
@@ -247,4 +180,36 @@ allocation_failed:
     free(B_values);
 
     return NULL;
+}
+
+void matmul_sparse_inner(float **output, int A_rows,
+    const int *A_row_ptr,
+    const int *A_col_idx,
+    const float *A_values,
+    const int *B_row_ptr,
+    const int *B_col_idx,
+    const float *B_values) {
+        /*
+     * For each nonzero A[i][k], visit the nonzeros in row k of B.
+     */
+    for (int i = 0; i < A_rows; i++) {
+
+        for (int p = A_row_ptr[i];
+             p < A_row_ptr[i + 1];
+             p++) {
+
+            int k = A_col_idx[p];
+            float A_ik = A_values[p];
+
+            for (int q = B_row_ptr[k];
+                 q < B_row_ptr[k + 1];
+                 q++) {
+
+                int j = B_col_idx[q];
+                float B_kj = B_values[q];
+
+                output[i][j] += A_ik * B_kj;
+            }
+        }
+    }
 }

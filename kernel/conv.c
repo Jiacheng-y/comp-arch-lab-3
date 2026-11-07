@@ -1,4 +1,5 @@
 #include "conv.h"
+#include <string.h>
 
 // Im2col algorithm
 float **im2col(float ***image, int numChannels, int imageSize, int kernelSize, int stride, int *outputSize)
